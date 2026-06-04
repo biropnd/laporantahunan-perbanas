@@ -365,7 +365,7 @@ body.not-authed #loginScreen{display:grid;grid-template-columns:1.05fr .95fr;}
   color:#fff;padding:64px 64px 48px;display:flex;flex-direction:column;position:relative;overflow:hidden;}
 .login-brand::after{content:'';position:absolute;left:-80px;bottom:-120px;width:420px;height:420px;border-radius:50%;border:1px solid rgba(255,255,255,.06);}
 .login-brand::before{content:'';position:absolute;right:-140px;top:-100px;width:380px;height:380px;border-radius:50%;border:1px solid rgba(193,215,44,.12);}
-.lb-logo{display:inline-flex;align-self:flex-start;}
+.lb-logo{display:inline-flex;align-self:flex-start;background:transparent;padding:0;border-radius:0;box-shadow:none;}
 .lb-logo img{height:128px;width:auto;object-fit:contain;display:block;}
 .lb-inst{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:700;}
 .lb-mid{margin-top:auto;margin-bottom:auto;position:relative;z-index:2;}
@@ -3716,9 +3716,24 @@ window.addEventListener('DOMContentLoaded',()=>{
   updateCompleteness();
   // Periodic autosave fallback every 30s (guarded: VIEW never persists)
   setInterval(saveToStorage, 30000);
-  // V6 — restore session (login logo uses the real asset file directly)
+  // V6 — restore session
   restoreSession();
+  // Logo fix: pakai logo yang sudah ter-embed di sidebar untuk layar login & kop cetak,
+  // dengan fallback ke berkas lokal Logo.png bila perlu.
+  syncBrandLogo();
 });
+function syncBrandLogo(){
+  try{
+    const sb=document.querySelector('.sb-logo-area img');
+    let src=sb&&sb.getAttribute('src')?sb.getAttribute('src'):'';
+    const isBroken=!src||/assets\/Logo-Perbanas\.png$/.test(src);
+    if(isBroken)src='Logo.png';
+    document.querySelectorAll('#loginLogo, .print-letterhead img').forEach(im=>{
+      im.src=src;
+      im.onerror=function(){if(this.src.indexOf('Logo.png')<0)this.src='Logo.png';};
+    });
+  }catch(e){}
+}
 </script>
 </body>
 </html>
